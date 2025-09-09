@@ -1,0 +1,71 @@
+{
+    "name": "order_processing_workflow",
+    "description":"This is the workflow for processing the order.",
+    "version":"1.0.0",
+    "inputParameters":[
+        "order_id",
+        "amount",
+        "status"
+    ],
+    "tasks": [
+        {
+            "taskReferenceName": "task1",
+            "type": "SET_VARIABLE",
+            "input": {
+              "variables":{
+                 "created_at": "$NOW"
+              }
+            }
+
+        },
+        {
+            "taskReferenceName": "decision1",
+            "type": "DECISION",
+            "input": {
+                "case_value_param": "amount",
+                "decision_cases": {
+                    "<200": ["task2"],
+                    ">5000": ["task3"]
+                },
+                "default_case": ["task4"]
+            }
+        },
+        {
+            "taskReferenceName": "task2",
+            "type": "HTTP",
+            "input": {
+                "url": "https://api.example.com/orders/${order_id}",
+                "method": "POST",
+                "body": {"status": "${status}"}
+            }
+        },
+
+        {
+                "taskReferenceName": "task3",
+                "type": "send_mail",
+                "input": {
+                    "to": ["customer@example.com", "ops@example.com"],
+                    "subject": "Order ${inputParameters.order_id} status update",
+                    "body": "Hello, your order with ID ${inputParameters.order_id.order_id} is now ${inputParameters.status}.",
+                    "cc": ["support@example.com"],
+                    "bcc": []
+                },
+                "next_task_ref_name":"task5"
+
+        },
+        {
+            "taskReferenceName": "task4",
+            "type": "SET_VARIABLE",
+            "input": {
+                "variables": {"note": "No matching case, executed default"}
+            }
+        },
+        {
+            "taskReferenceName": "task5",
+            "type": "approval",
+            "input": {
+                "variables": {"note": "No matching case, executed default"}
+            }
+        }
+    ]
+}

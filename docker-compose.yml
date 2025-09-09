@@ -1,0 +1,92 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:12
+    container_name: temporal_postgres
+    ports:
+      - "5440:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  temporal:
+    image: temporalio/auto-setup:1.27.1
+    container_name: temporal_server
+    ports:
+      - "7233:7233"
+    environment:
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PWD: ${POSTGRES_PASSWORD}
+      POSTGRES_SEEDS: postgres
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+      POSTGRES_SCHEMA: temporal
+      VISIBILITY_DB: ${POSTGRES_DB_NAME}
+      VISIBILITY_SCHEMA: temporal_visibility
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  temporal-ui:
+    image: temporalio/ui:2.36.0
+    container_name: temporal_server_ui
+    ports:
+      - "8081:8080"
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+    depends_on:
+      - temporal
+
+  # Small init container to ensure namespace exists
+  temporal-init:
+    image: temporalio/admin-tools:1.27.1
+    container_name: temporal_admin_tools
+    environment:
+        TEMPORAL_CLI_ADDRESS: temporal:7233   # ✅ correct variable for CLI
+    depends_on:
+      - temporal
+    entrypoint: >
+      sh -c "
+        until tctl --namespace default namespace describe 2>/dev/null;
+        do echo 'waiting for temporal...'; sleep 5; done &&
+        tctl --namespace default namespace register --retention 1 || true
+      "
+
+  app:
+    build: .
+    container_name: fastapi_app
+    command: uvicorn app:app --reload --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB_NAME}
+      - TEMPORAL_HOST=temporal:7233
+    depends_on:
+      - postgres
+      - temporal
+
+  worker:
+    build: .
+    container_name: temporal_worker
+    command: python worker.py
+    volumes:
+      - .:/code
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB_NAME}
+      - TEMPORAL_HOST=temporal:7233
+      - TEMPORAL_NAMESPACE=default
+      - TEMPORAL_TASK_QUEUE=dsl-task-queue
+    depends_on:
+      - temporal
+      - postgres
+
+volumes:
+  pgdata:

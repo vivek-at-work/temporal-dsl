@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Workflow Decision</title>
+</head>
+<body>
+    <h2>Submit Workflow Decision</h2>
+    <form method="post" action="/decision">
+        <label for="workflow_id">Workflow ID:</label><br>
+        <input type="text" id="workflow_id" name="workflow_id" required><br><br>
+
+        <label>
+            <input type="radio" name="decision" value="APPROVED" required> APPROVED
+        </label><br>
+        <label>
+            <input type="radio" name="decision" value="REJECTED"> REJECTED
+        </label><br><br>
+
+        <button type="submit">Submit Decision</button>
+    </form>
+</body>
+</html>
