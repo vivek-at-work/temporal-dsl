@@ -11,6 +11,6 @@ class TaskInput(BaseModel):
         task_ref_name (str): The reference name of the task.
     """
     task_ref_name: str
-    inputValues: Optional[Dict[str, Any]] = None
+
 
 

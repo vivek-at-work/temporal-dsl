@@ -1,7 +1,7 @@
 # Description: Decision task handler with operator support for workflow engine
 from ...schema import TaskInput, DSLModel
 from pydantic import Field, model_validator
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 import re
 import operator
 from ..base_task_handler import BaseTaskHandler
@@ -11,7 +11,7 @@ class DecisionTaskInput(TaskInput):
 
     """Strict input model for a decision task with operator support."""
 
-    case_value_param: str = Field(..., description="The key to select the decision case.")
+    param_value: Any = Field(..., description="The key to select the decision case.")
     decision_cases: Dict[str, List[str]] = Field(
         ..., description="Mapping of conditions to their corresponding actions."
     )
@@ -69,7 +69,7 @@ class DecisionTaskHandler(BaseTaskHandler):
             TaskResult: Decision execution result.
         """
         # Read parameter from workflow input
-        param_value = data.inputValues.get(data.case_value_param)
+        param_value = data.param_value
         chosen: List[str] = data.default_case
 
         if param_value is None:

@@ -22,7 +22,7 @@
             "taskReferenceName": "decision1",
             "type": "DECISION",
             "input": {
-                "case_value_param": "amount",
+                "param_value": "${inputParameters.amount}",
                 "decision_cases": {
                     "<200": ["task2"],
                     ">5000": ["task3"]

@@ -27,7 +27,7 @@ class ActivityTaskExecutor:
         """Executes the task by invoking the corresponding activity."""
         task_type = (task.type or "").upper()
         activity_name = self._activity_name(task_type)
-        payload = PayloadBuilder.build(task, dsl)
+        payload = PayloadBuilder.build(task)
         workflow.logger.info("Executing %s", activity_name)
         return await workflow.execute_activity(
             activity_name,
