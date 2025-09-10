@@ -46,8 +46,6 @@ class SetVariableTaskHandler(BaseTaskHandler):
             :param workflow_input:
         """
         resolved_vars: Dict[str, Any] = {}
-        print(data)
-
         for key, value in data.variables.items():
             if isinstance(value, str) and value.upper() == "$NOW":
                 resolved_vars[key] = datetime.now(timezone.utc).isoformat()

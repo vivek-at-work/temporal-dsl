@@ -21,8 +21,6 @@ class ApprovalTaskHandler(BaseTaskHandler):
         return ApprovalTaskInput(**data)
 
     async def execute(self, data: ApprovalTaskInput) -> TaskResult:
-        # For now: just simulate waiting for approval
-        print(f"[APPROVAL REQUIRED] {data.message}")
         # In real flow: you'd pause the workflow and wait for a signal
         return TaskResult(
             task_ref_name=data.task_ref_name,

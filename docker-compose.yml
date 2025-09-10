@@ -73,20 +73,20 @@ services:
       - postgres
       - temporal
 
-  worker:
-    build: .
-    container_name: temporal_worker
-    command: python worker.py
-    volumes:
-      - .:/code
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB_NAME}
-      - TEMPORAL_HOST=temporal:7233
-      - TEMPORAL_NAMESPACE=default
-      - TEMPORAL_TASK_QUEUE=dsl-task-queue
-    depends_on:
-      - temporal
-      - postgres
+#  worker:
+#    build: .
+#    container_name: temporal_worker
+#    command: python worker.py
+#    volumes:
+#      - .:/code
+#    environment:
+#      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB_NAME}
+#      - TEMPORAL_HOST=temporal:7233
+#      - TEMPORAL_NAMESPACE=default
+#      - TEMPORAL_TASK_QUEUE=dsl-task-queue
+#    depends_on:
+#      - temporal
+#      - postgres
 
 volumes:
   pgdata:

@@ -34,7 +34,7 @@ class WorkerConfig:
     def __init__(self):
         # Load from env; replace with YAML/TOML parser if preferred
         self.namespace = os.getenv("TEMPORAL_NAMESPACE", "default")
-        self.task_queue = os.getenv("TEMPORAL_TASK_QUEUE", "default-task-queue")
+        self.task_queue = os.getenv("TEMPORAL_TASK_QUEUE", "dsl-task-queue")
         self.server_url = os.getenv("TEMPORAL_HOST", "localhost:7233")
         self.max_concurrent_activities = int(os.getenv("TEMPORAL_MAX_ACTIVITIES", "100"))
         self.metrics_enabled = os.getenv("TEMPORAL_METRICS_ENABLED", "true").lower() == "true"

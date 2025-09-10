@@ -46,7 +46,7 @@
                 "input": {
                     "to": ["customer@example.com", "ops@example.com"],
                     "subject": "Order ${inputParameters.order_id} status update",
-                    "body": "Hello, your order with ID ${inputParameters.order_id.order_id} is now ${inputParameters.status}.",
+                    "body": "Hello, your order with ID ${inputParameters.order_id} is now ${inputParameters.status}. Created at ${task1.output.created_at}",
                     "cc": ["support@example.com"],
                     "bcc": []
                 },

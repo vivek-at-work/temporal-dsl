@@ -1,7 +1,7 @@
 from typing import Optional, Dict, Any
 from pydantic import constr
 from pydantic import BaseModel, Field
-
+from .task_result import TaskResult
 
 class TaskModel(BaseModel):
     """Represents a task definition in a Netflix Conductor workflow.
@@ -26,11 +26,9 @@ class TaskModel(BaseModel):
     optional: Optional[bool] = Field(
         None, description="Whether the task is optional."
     )
-    output: Dict[str, Any] = Field(
+    output: Optional[TaskResult] = Field(
         None, description="Output of the task.",
     )
-    reason: Optional[str] = Field(
-        None, description="reason of the task.",
+    next_task_ref_name: Optional[str] = Field(
+        None, description="Next Task to execute."
     )
-    status: constr(pattern="^(COMPLETED|FAILED|IN_PROGRESS|TERMINATED|PENDING)$") = "PENDING"
-    next_task_ref_name: Optional[str] = None
