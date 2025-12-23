@@ -1,3 +1,119 @@
+## 🧭 Architecture Summary (README-Ready)
+
+This system implements a **DSL-driven workflow orchestration platform** using **Temporal** with explicit support for **human-in-the-loop approvals**.
+
+### One-Line Mental Model
+```code
+DSL defines intent → Workflow orchestrates → Worker executes → API signals decisions
+```
+
+### Key Concepts
+
+* **DSL as Intent**
+
+  * Workflows are defined declaratively (JSON/YAML).
+  * The DSL expresses *what* should happen, not *how* it is executed.
+
+* **Workflow as Orchestrator**
+
+  * `DSLWorkflow` interprets the DSL and controls execution order.
+  * All control flow is deterministic and replay-safe.
+
+* **Activities as Side Effects**
+
+  * External actions (HTTP, email, variable mutation) are isolated in activities.
+  * Activities provide retries, timeouts, and fault isolation.
+
+* **Signals for Human Interaction**
+
+  * Approvals and rejections enter the system via Temporal signals.
+  * No polling, no external state checks, no blocking threads.
+
+* **FastAPI as Control Plane**
+
+  * The API layer exposes simple endpoints for humans or systems.
+  * It never executes business logic—only signals workflows.
+
+### Why This Architecture Works
+
+* Scales to long-running workflows (minutes → months)
+* Fully auditable execution history
+* Clean separation of concerns
+* Easy to extend with new DSL task types
+* Aligns with Temporal best practices for determinism and reliability
+
+In short: **DSL defines intent, Temporal guarantees execution, FastAPI enables control.**
+```code
++-----------------------------------------------------------+
+|                       External Actors                     |
+|                                                           |
+|   +-------------------+        +----------------------+   |
+|   | Human / System    |        | curl / REST Client   |   |
+|   +---------+---------+        +----------+-----------+   |
+|             |                               |               |
++-------------|-------------------------------|---------------+
+              v                               v
++-----------------------------------------------------------+
+|                       API Layer                           |
+|                                                           |
+|   +---------------------------------------------------+   |
+|   |           FastAPI App (app.py)                    |   |
+|   |                                                   |   |
+|   |   /approval   /rejection   (Temporal Signals)     |   |
+|   +------------------------+--------------------------+   |
+|                            |                              |
++----------------------------|------------------------------+
+                             v
++-----------------------------------------------------------+
+|                    Temporal Platform                      |
+|                                                           |
+|   +--------------------+       +----------------------+   |
+|   | Temporal Server    |<----->| Temporal Web UI      |   |
+|   |  localhost:7233   |       |  localhost:8080      |   |
+|   +---------+----------+       +----------------------+   |
+|             |                                              |
++-------------|----------------------------------------------+
+              |
+              v
++-----------------------------------------------------------+
+|                   Execution Layer                         |
+|                                                           |
+|   +--------------------+                                  |
+|   | DSLWorkflow        |  (workflow.py)                   |
+|   |  - Orchestration   |                                  |
+|   |  - Signal Handling |                                  |
+|   +---------+----------+                                  |
+|             |                                             |
+|             | schedules                                  |
+|             v                                             |
+|   +--------------------+       +----------------------+   |
+|   | Temporal Worker    |-----> | Activities           |   |
+|   | (worker.py)        |       | (core/activities)    |   |
+|   +--------------------+       +----------------------+   |
+|                                                           |
++-----------------------------------------------------------+
+
++-----------------------------------------------------------+
+|                     Domain Layer                          |
+|                                                           |
+|   +--------------------+                                  |
+|   | DSL Definition     |  (JSON / YAML)                   |
+|   +---------+----------+                                  |
+|             |                                             |
+|             v                                             |
+|   +--------------------+                                  |
+|   | DSL Parser         |  (core/dsl)                      |
+|   +---------+----------+                                  |
+|             |                                             |
+|             v                                             |
+|   +--------------------+                                  |
+|   | Workflow Context   |  (state & variables)             |
+|   +--------------------+                                  |
+|                                                           |
++-----------------------------------------------------------+
+
+```
+
 # 🧪 How to Run & Test the DSL + Temporal App
 
 ## 1) Prerequisites
