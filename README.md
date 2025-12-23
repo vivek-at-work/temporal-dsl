@@ -1,4 +1,4 @@
-## 🧭 Architecture Summary (README-Ready)
+## 🧭 Architecture Summary 
 
 This system implements a **DSL-driven workflow orchestration platform** using **Temporal** with explicit support for **human-in-the-loop approvals**.
 
